@@ -1,13 +1,31 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import numpy as np
 
 app = FastAPI(title="API Clasificación Clínica")
 
+# =========================
+# CORS (OBLIGATORIO PARA WORDPRESS)
+# =========================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # luego puedes restringir al dominio WP
+    allow_credentials=True,
+    allow_methods=["*"],  # IMPORTANTE: permite OPTIONS
+    allow_headers=["*"],
+)
+
+# =========================
+# MODELO
+# =========================
 model = joblib.load("model.pkl")
 scaler = joblib.load("scaler.pkl")
 
+# =========================
+# SCHEMA
+# =========================
 class Paciente(BaseModel):
     Edad: int
     Género: int
@@ -34,6 +52,9 @@ class Paciente(BaseModel):
     Uso_antibióticos: int
     Uso_IBP: int
 
+# =========================
+# ENDPOINT
+# =========================
 @app.post("/predecir")
 def predecir(p: Paciente):
     X = np.array([[  
