@@ -1,9 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import numpy as np
 
+# =========================
+# APP
+# =========================
 app = FastAPI(title="API Clasificación Clínica")
 
 # =========================
@@ -11,9 +14,9 @@ app = FastAPI(title="API Clasificación Clínica")
 # =========================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # luego puedes restringir al dominio WP
+    allow_origins=["*"],          # luego puedes restringir al dominio WP
     allow_credentials=True,
-    allow_methods=["*"],  # IMPORTANTE: permite OPTIONS
+    allow_methods=["*"],          # permite POST, OPTIONS, etc.
     allow_headers=["*"],
 )
 
@@ -53,7 +56,7 @@ class Paciente(BaseModel):
     Uso_IBP: int
 
 # =========================
-# ENDPOINT
+# ENDPOINT POST
 # =========================
 @app.post("/predecir")
 def predecir(p: Paciente):
@@ -90,3 +93,10 @@ def predecir(p: Paciente):
     return {
         "clasificacion": int(pred)
     }
+
+# =========================
+# ENDPOINT OPTIONS (FIX DEFINITIVO CORS)
+# =========================
+@app.options("/predecir")
+def options_predecir():
+    return Response(status_code=200)
